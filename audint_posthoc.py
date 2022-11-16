@@ -61,7 +61,7 @@ if dataset == 'esc50':
     esc50_dir = home_dir + '/datasets'
     #esc50_dir = '/tsi/clusterhome/jparekh/L2I/datasets'
     esc50_train1 = dl.ESC50(mode='train', num_FOLD=num_FOLD, root_dir=esc50_dir + '/ESC50')
-    esc50_test1 = dl.ESC50(mode='test', num_FOLD=num_FOLD, root_dir=esc50_dir + '/ESC50', add_noise=True)
+    esc50_test1 = dl.ESC50(mode='test', num_FOLD=num_FOLD, root_dir=esc50_dir + '/ESC50', add_noise=False)
     train_loader = torch.utils.data.DataLoader(esc50_train1, batch_size=32, shuffle=train_shuffle, num_workers=1)
     test_loader = torch.utils.data.DataLoader(esc50_test1, batch_size=16, shuffle=test_shuffle, num_workers=1)
 
@@ -1144,6 +1144,8 @@ def overlap_exp(dataload, idx1, idx2, lambda2, f, H, W, h, model_name):
 batch = next(iter(test_loader))
 sample_data, sample_target, file_names = batch[0], batch[1], batch[2]
 
+### Code for handling classifier training/fine-tuning for different datasets or loading weights
+
 if clf_train:
     if dataset == 'sust':
         progress = train_classifier(f, device, train_loader, test_loader, opt_f, 4)
@@ -1181,6 +1183,9 @@ else:
         checkpoint = torch.load('output/' + dataset + '_output/' + 'classifier_fold' + str(num_FOLD) + '.pt', map_location='cpu')
         f.load_state_dict(checkpoint['f_state_dict'])
         f = f.eval().to(device)
+
+
+### Code for L2I training and evaluation
 
 if args[0] == 'train':
     time1 = time.time()
@@ -1238,7 +1243,6 @@ if args[0] == 'train':
     #print ('Model Name:', model_name)
 
 
-
 elif args[0] == 'test':
     model_name = args[4][:-3]
     try:
@@ -1274,41 +1278,33 @@ elif args[0] == 'test':
     # EVALUATION Rooster+ Interpretation generations on samples
     #test_info = test(f, H, h, W, device, test_loader)
     if dataset == 'esc50':
+        # To run these experiments ensure add_noise=False where esc50_test1 is declared (~ line 64).
         print ('Top-k fidelity correct out of 400 test samples')
-        #a, b, c = analyze(f, H, h, W, device, test_loader, n_classes=50)
-        #print ('Top-1 fidelity total:', int(np.sum(np.diag(b))))
+        a, b, c = analyze(f, H, h, W, device, test_loader, n_classes=50)
+        print ('Top-1 fidelity total:', int(np.sum(np.diag(b))))
         
-        #overlap_exp(esc50_test1, 300, 157, 0.6, f, H, W, h, model_name)
-        #overlap_exp(esc50_test1, 157, 300, 0.15, f, H, W, h, model_name)
-        #overlap_exp(esc50_test1, 199, 178, 1.0, f, H, W, h, model_name)
-        #overlap_exp(esc50_test1, 157, 229, 0.09, f, H, W, h, model_name)
+        overlap_exp(esc50_test1, 300, 157, 0.6, f, H, W, h, model_name)
+        overlap_exp(esc50_test1, 157, 300, 0.15, f, H, W, h, model_name)
+        overlap_exp(esc50_test1, 199, 178, 1.0, f, H, W, h, model_name)
+        overlap_exp(esc50_test1, 157, 229, 0.09, f, H, W, h, model_name)
 
         
-        # To run noise experiments. First make add_noise=True at the start where esc50_test1 is declared. This will add noise to test samples
-        for i in [178, 199, 229, 237, 300, 323]:
-            print ('Sample index', i)
-            explanation_multiclass(esc50_test1, i, f, H, W, h, model_name)
+        # To run noise experiments. First make add_noise=True at the start where esc50_test1 is declared (~ line 64). This will add noise to test samples. Or uncomment the line below
+        #esc50_test1 = dl.ESC50(mode='test', num_FOLD=num_FOLD, root_dir=esc50_dir + '/ESC50', add_noise=True)
+        #for i in [178, 199, 229, 237, 300, 323]:
+        #    print ('Sample index', i)
+        #    explanation_multiclass(esc50_test1, i, f, H, W, h, model_name)
         
-        
-        #print ('Ready to analyze')
-        #cl_arr = []
-        #for i in range(400):
-        #    cl_arr.append(int(esc50_test1[i][1]))
-        #cl_arr = np.array(cl_arr)
-        #for i in [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 14, 15, 20, 21, 24, 25, 30, 40, 100, 101, 157, 158]:
-            #print ('Sample index', i)
-            #explanation_multiclass(esc50_test1, i, f, H, W, h, model_name)
-        
-        #for i in range(400):        
-            #ff.append(faithfulness_eval_multiclass(esc50_test1, i, f, H, W, h, save_audio=False, thresh=0.3, select_random=False))
+        '''
+        print ('\nComputing faithfulness results\n')
+        for i in range(400):        
+            ff.append(faithfulness_eval_multiclass(esc50_test1, i, f, H, W, h, save_audio=False, thresh=0.3, select_random=False))
             # [Absolute logit drop, Absolute probability drop, Relative probability drop, predicted class, top-1 agreement, top-3 agreement, top-5 agreement, num_relevant_components]
-        #ff = np.array(ff)
-        #idx = np.where(ff[:, 4] == 1)[0]
-        #print ('stats (top-1)', np.median(ff[idx, 0]), ff[idx, 7].mean())
-        #print ('stats (full)', np.median(ff[:, 0]), ff[:, 7].mean())
-        #print ('absolute prob_drop', np.median(ff[:, 1]), np.median(ff[idx, 1]))
-        
-        #stats = np.array([[ff[:, 0].mean(), ff[:, 0].std(), np.median(ff[:, 0]), ff[:, 1].mean(), ff[:, 1].std(), np.median(ff[:, 1]), ff[:, 2].mean(), ff[:, 2].std(), np.median(ff[:, 2]), ff[:, 7].mean()], [ff[top1_idx, 0].mean(), ff[top1_idx, 0].std(), np.median(ff[top1_idx, 0]), ff[top1_idx, 1].mean(), ff[top1_idx, 1].std(), np.median(ff[top1_idx, 1]), ff[top1_idx, 2].mean(), ff[top1_idx, 2].std(), np.median(ff[top1_idx, 2]), ff[top1_idx, 7].mean()], [ff[top3_idx, 0].mean(), ff[top3_idx, 0].std(), np.median(ff[top3_idx, 0]), ff[top3_idx, 1].mean(), ff[top3_idx, 1].std(), np.median(ff[top3_idx, 1]), ff[top3_idx, 2].mean(), ff[top3_idx, 2].std(), np.median(ff[top3_idx, 2]), ff[top3_idx, 7].mean()], [ff[top5_idx, 0].mean(), ff[top5_idx, 0].std(), np.median(ff[top5_idx, 0]), ff[top5_idx, 1].mean(), ff[top5_idx, 1].std(), np.median(ff[top5_idx, 1]), ff[top5_idx, 2].mean(), ff[top5_idx, 2].std(), np.median(ff[top5_idx, 2]), ff[top5_idx, 7].mean()]])
+        ff = np.array(ff)
+        print ('absolute logit drop, num_components used', np.median(ff[:, 0]), ff[:, 7].mean())
+        print ('absolute prob drop', np.median(ff[:, 1]))
+        '''
+
         
     elif dataset == 'sust':
         #class_thresh = compute_multilabel_threshold(f, H, h, train_loader)
