@@ -9,7 +9,7 @@ import numpy as np
 # Important code for Knowledge Transfer anurag kumar model
 import weak_feature_extractor.network_architectures as netark
 from collections import OrderedDict
-pre_model_path = 'weak_feature_extractor/mx-h64-1024_0d3-1.17.pkl'
+#pre_model_path = 'weak_feature_extractor/mx-h64-1024_0d3-1.17.pkl'
 netType = getattr(netark, 'weak_mxh64_1024')
 netwrkgpl = F.max_pool2d # keep it fixed. It was avg_pool2d for experiments on ESC, initial experiments on SONYC_UST
 
@@ -17,7 +17,7 @@ class FtEx(nn.Module):
     def __init__(self, n_classes=10, multi_label=False):
         super(FtEx, self).__init__()
         self.netx = netType(527, netwrkgpl) # Only initially to load model
-        self.load_model(pre_model_path)
+        #self.load_model(pre_model_path)
         self.layer = nn.Sequential(nn.Conv2d(1024, 256, kernel_size=1), nn.ReLU())
         self.fc = nn.Linear(256, n_classes, bias=True)
         self.reg = nn.Dropout(0.2)
@@ -47,7 +47,7 @@ class FtEx_v2(nn.Module):
     def __init__(self, n_classes=10, mid_size=256):
         super(FtEx_v2, self).__init__()
         self.netx = netType(527, netwrkgpl) # Only initially to load model
-        self.load_model(pre_model_path)
+        #self.load_model(pre_model_path)
         self.layer = nn.Sequential(nn.Conv2d(1024, mid_size, kernel_size=1), nn.ReLU())
         self.fc = nn.Linear(mid_size, n_classes, bias=True)
         self.reg = nn.Dropout(0.15)
