@@ -40,7 +40,7 @@ The backbone network that we fine-tune and perform post-hoc interpretation on is
 
 ## Usage
 
-```audio_posthoc.py``` is our main file
+```audint_posthoc.py``` is our main file
 
     1. Command: python audint_posthoc.py [mode test or train] [dataset name] [use-gpu True or False] [fine-tune-classifier True or False] [if mode is test, enter model name here as 4th argument]
 
@@ -50,7 +50,7 @@ The backbone network that we fine-tune and perform post-hoc interpretation on is
        python audint_posthoc.py test esc50 False False try10_AttExpv2.pt 
        python audint_posthoc.py test sust False False try14_AttExp_v2.pt.
        
-These commands should generate the fidelity metrics by default and in case of ESC-50, also generate interpretations from overlap experiment. You can run other experiments (faithfulness or noise experiments) by uncommenting various parts from L1283 -- L1336 of ```audio_posthoc.py```. 
+These commands should generate the fidelity metrics by default and in case of ESC-50, also generate interpretations from overlap experiment. You can run other experiments (faithfulness or noise experiments) by uncommenting various parts from L1283 -- L1336 of ```audint_posthoc.py```. 
    
 NOTE: The functionality for fine-tuning the classifier is not setup properly. Refer to Setup above about this issue. 
     
