@@ -5,6 +5,9 @@ This repository constains code for the paper ["Listen to Interpret: Post-hoc Int
 Link for the [project webpage](https://jayneelparekh.github.io/listen2interpret/). Contains audio samples and interpretations for all the experiments.
 
 ## Setup
+
+### Virtual Environment
+
 Setup a new conda environment with the ```env_audio.yml``` file.
 
 ```sh
@@ -16,6 +19,8 @@ NOTE: The default pytorch installed would be cpu usage only. If you wish to trai
 ```
    conda install pytorch==1.7.1 torchvision==0.8.2 cudatoolkit=9.2 -c pytorch
 ```
+
+### Datasets
 
 We perform experiments on two datasets: ESC-50 AND SONYC-UST. You will need to download and extract the datasets. Instructions for downlading the two are given below.
 
