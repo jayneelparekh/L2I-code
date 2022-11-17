@@ -11,7 +11,7 @@ Setup a new conda environment with the ```env_audio.yml``` file.
    conda env create -f env_audio.yml
 ```
 
-NOTE: The default pytorch installed would be cpu usage only. IF YOU WANT to TRAIN and USE GPU, please also run this command (or an equivalent command according to your CUDA compatibility) after creating the environment.
+NOTE: The default pytorch installed would be cpu usage only. If you wish to train with GPU (recommended, specially for SONYC-UST), please also run this command after creating the environment (or an equivalent according to your CUDA compatibility).
 
 ```
    conda install pytorch==1.7.1 torchvision==0.8.2 cudatoolkit=9.2 -c pytorch
@@ -30,7 +30,7 @@ If the datasets are downloaded and extracted in a different directory, please en
 
 The trained models on ESC-50 fold-1, SONYC-UST are available in the 'output/esc50_output/', 'output/sust_output/' directories respectively along with the trained dictionaries on them.
 
-The backbone network that we fine-tune and perform post-hoc interpretation on is based on the work of [Kumar et al.](https://github.com/anuragkr90/weak_feature_extractor). We have not uploaded the pre-trained weights of this network. We have directly provided our fine-tuned weights on our datasets. 
+The backbone network that we fine-tune and perform post-hoc interpretation on is based on the work of [Kumar et al.](https://github.com/anuragkr90/weak_feature_extractor). We have not uploaded the pre-trained weights (on AudioSet) of this network, but rather our fine-tuned weights on our datasets. To train on a new dataset please refer to the original repository.  
 
 
 ## Usage
@@ -43,24 +43,17 @@ The backbone network that we fine-tune and perform post-hoc interpretation on is
 
     3. Example commands: 
        python audint_posthoc.py test esc50 False False try10_AttExpv2.pt 
-       python audint_posthoc.py test sust False False try14_AttExp_v2.pt (if you don't have GPU).
+       python audint_posthoc.py test sust False False try14_AttExp_v2.pt.
        
 These commands should generate the fidelity metrics by default and in case of ESC-50, also generate interpretations from overlap experiment. You can run other experiments (faithfulness or noise experiments) by uncommenting various parts from L1283 -- L1336 of ```audio_posthoc.py```. 
    
-NOTE 1: The functionality for fine-tuning the classifier is not setup properly. Contact me separately if you wish to add it. 
+NOTE: The functionality for fine-tuning the classifier is not setup properly. Refer to Setup above about this issue. 
     
     
      4. Command for training:
      python audint_posthoc.py train esc50 True False
      
-     GPU-usage by default is preferred for training. Refer to Setup above for adding GPU-support.
-    
-    
-    
-## License
-
-Add license
-
+     GPU-usage is recommended for training. Refer to Setup above for adding GPU-support.
 
 
 
